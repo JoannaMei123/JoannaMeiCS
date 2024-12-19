@@ -4,6 +4,7 @@
 
 using namespace std;
 
+//Room.cpp, setting up each of the commands that are being called later
 room::room() {
 
 }

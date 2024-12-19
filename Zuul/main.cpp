@@ -7,12 +7,24 @@
 #include <vector>
 
 using namespace std;
+/*
 
+Author: Joanna Mei
+Date: December 18th, 2024
+This is the main class for Zuul, and is used to run the game. 
+
+The objective of this game is to collect all 6 items scattered through the map. 
+
+
+*/
+
+
+
+//Initializing the Functions
 void goingToPlace(vector<room *> rooms, map<char *, room *> &exits, room *&currentRoom);
 void getItem(vector<item *> items, vector<item *> &currentItems, room *&currentRoom);
 void getInv(vector<item *> &currentItems, room *&currentRoom);
 void dropItem(vector<item *> items, vector<item *> &currentItems, room *&currentRoom);
-void checkWin(vector<item *> items, vector<item *> &currentItems, room *&currentRoom, map<char *, room *> &exits);
 
 
 
@@ -62,7 +74,7 @@ int main() {
   room *start = new room((char *)"It looks familiar");
   room *bathroomsecret = new room((char *)"Whats this? A place to rest?");
 
-  // Creating the exits of all the rooms. Split into each category used.
+  // Creating the exits of all the rooms
   start->makeExit((char *)"north", cafeteria);
   start->makeExit((char *)"south", office);
 
@@ -177,13 +189,16 @@ int main() {
   }
 }
 
+//Going to place, or the function that is called when you use "MOVE" command
 void goingToPlace(vector<room *> rooms, map<char *, room *> &exits,
                   room *&currentRoom) {
 
   char output[200];
 
+  
   cout << endl;
   currentRoom->getExitsExisting();
+  //Somehow this works compared to simply calling it in for loop
   map <char*, room*> roomMap = currentRoom->getExit();
   map<char *, room *>::iterator i;
   cout << "Enter the one which you would go to" << endl;
@@ -191,8 +206,10 @@ void goingToPlace(vector<room *> rooms, map<char *, room *> &exits,
   cin.ignore();
   cout << endl;
 
-
+  //Looping through the map's exits to see if the user input matches any of them
   for (i = roomMap.begin(); i != roomMap.end(); i++) {
+
+    //Comparing output with the first member
     if (strcmp(output, i->first) == 0) {
       currentRoom = i->second;
       break;
@@ -200,15 +217,20 @@ void goingToPlace(vector<room *> rooms, map<char *, room *> &exits,
   }
 }
 
+
+//Getting item function, or the function that is called when you use "GRAB" command
 void getItem(vector<item *> items, vector<item *> &currentItems, room *&currentRoom) {
   char decision[100];
 
   cout << endl;
+
+  //Prints the current items in each given room
   currentRoom->printItem();
   cout << "What item do you want to grab?" << endl;
   cin >> decision;
   cin.ignore();
 
+  //If the room has no items
   if (currentRoom->noItems() == 0) {
     cout << "There are no items in the room." << endl;
   } else {
@@ -218,12 +240,15 @@ void getItem(vector<item *> items, vector<item *> &currentItems, room *&currentR
   }
 }
 
+
+//Getting inventory function, or the function that is called when you use "INVENTORY" command
 void getInv(vector<item *> &currentItems, room *&currentRoom) {
 
   if (currentItems.size() == 0) {
     cout << "No items in ur inventory." << endl;
   }
   cout << " You currently have these items:  " << endl;
+
 
   for (std::vector<item *>::iterator it = currentItems.begin();
        it != currentItems.end(); ++it) {
@@ -232,6 +257,7 @@ void getInv(vector<item *> &currentItems, room *&currentRoom) {
   }
 }
 
+//Dropping item function 
 void dropItem(vector<item *> items, vector<item *> &currentItems,
               room *&currentRoom) {
   char input[100];
