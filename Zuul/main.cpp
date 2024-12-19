@@ -111,7 +111,7 @@ int main() {
 
   // Determines whether the player has entered the secret room or not
 
-  bool enteredsecret = false;
+  //bool enteredsecret = false;
 
   // Sets starting room for the game
   currentRoom = start;
@@ -119,38 +119,13 @@ int main() {
   while (true) {
 
     //Win Statement Check
-    bool plungerUsed = false;
-    bool pushpinUsed = false;
-    bool bucketObtained = false;
-    bool ladderObtained = false;
-    bool keyUsed = false;
-    bool rifleObtained = false;
-
-
-    for (int i = 0; i <= 6; i++) {
-
-      if (strcmp(currentItems[i]->getItemInfo(),"Plunger") == 0) {
-        plungerUsed = true;
-        cout << "Plunger obtained";
-      } else if (strcmp(currentItems[i]->getItemInfo(),"Pushpin") == 0) {
-        pushpinUsed = true;
-      } else if (strcmp(currentItems[i]->getItemInfo(),"Bucket") == 0) {
-        bucketObtained = true;
-      } else if (strcmp(currentItems[i]->getItemInfo(),"Ladder") == 0) {
-        ladderObtained = true;
-      } else if (strcmp(currentItems[i]->getItemInfo(),"Key") == 0){
-        keyUsed = true;
-      } else if (strcmp(currentItems[i]->getItemInfo(),"Rifle") == 0) {
-        rifleObtained = true;
-      }
-    }
-
-
-
-    if (plungerUsed == true && pushpinUsed == true && bucketObtained == true && ladderObtained == true && keyUsed == true && rifleObtained == true && enteredsecret == true)  {
-      cout << "Congratulations, you won!";
+    if (currentItems.size() == 6) {
+      cout << "You have found all the items! You have won the game!" << endl;
       break;
+    } else {
+      cout << "You are missing something.." << endl;
     }
+
 
 
   /*  
