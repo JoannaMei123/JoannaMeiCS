@@ -36,7 +36,7 @@ void shuntingYard(node*& head, char* output);
 int order(char operators);
 
 //Building shunting stack stuff
-void tree(node*& head);
+void buildTree(node*& head);
 void prefix(node* head); //originakl formatting for operators
 void infix(node* head); 
 void postfix(node* head); //where the operators will end ujp
@@ -63,7 +63,7 @@ int main() {
 
     //Initializing tree and shunting yard functions
     shuntingYard(head, output);
-    tree(head);
+    buildTree(head);
     while (true){
       char ins[102];
       cout<<endl;
