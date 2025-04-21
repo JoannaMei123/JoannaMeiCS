@@ -125,7 +125,7 @@ int main() {
       int deleteNum;
       cin >> deleteNum;
       int found = search(tree, deleteNum);
-      int root = tree->getData();
+      //int root = tree->getData();
 
       //Double checks to see if number exists in tree
       if(found == deleteNum)
@@ -162,7 +162,7 @@ int branchCount(BinaryNode* node){
 }
 
 //Functino to take data from the file 
-void addFile(BinaryNode* &tree){
+void File(BinaryNode* &tree){
   char* fileName = new char[20];
 
   //Ask the user to enter the file name
@@ -180,7 +180,7 @@ void addFile(BinaryNode* &tree){
 }
 
 //Taking input numbers from console
-void addConsole(BinaryNode* &tree){
+void Console(BinaryNode* &tree){
   bool entering = true;
   char input[10];
 
