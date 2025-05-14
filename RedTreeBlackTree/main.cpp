@@ -14,10 +14,12 @@ struct node {
 
 /*
 Red black tree!
-Date: 4/21/25
+Date: 5/13/25
 Author: Joanna Mei
 
 This program aims to create a red black tree and allow the user to insert, search, delete, and print the tree. The user can also insert numberbers from a file.
+
++ You are now able to delete nodes from tree!
 */
 
 
@@ -30,6 +32,8 @@ void print(node* root, int emptyNode);
 void Left(node*& turningNode, node*& root);
 void Right(node*& turningNode, node*& root);
 bool search(node* root, int numberToSearch);
+void deleteNode(node*& root, int number);
+void deleteHelp(node* root, node* node);
 node* lowest(node* root);
 
 int main() {
@@ -40,7 +44,7 @@ int main() {
 
     while (true) {
         char input[100];
-        cout << "Hello there, what woudl you like to do? Add: MANUALLY, FILE, SEARCH, PRINT, QUIT" << endl;
+        cout << "Hello there, what woudl you like to do? Add: MANUALLY, FILE, SEARCH, DELETE, PRINT, QUIT" << endl;
         cin >> input;
 
       //if statements that check what the user wants to do
@@ -56,6 +60,12 @@ int main() {
                 print(root, emptyNode);
                 cout << endl;
             }
+        } else if (strcmp(input, "DELETE") == 0) {
+            cout<<"Which number would you like to delete?: ";
+            int number;
+            cin>>number;
+            deleteNode(root, number);
+            print(root, emptyNode);
         } else if (strcmp(input, "SEARCH") == 0) {
             cout << "What number would you like to search for? ";
             cin >> number;
@@ -253,4 +263,128 @@ void Right(node*& turningNode, node*& root) {
     }
     rotatiningNode->right = turningNode;
     turningNode->parent = rotatiningNode;
+}
+
+//Deleting nodes within a red and black tree 
+void deleteNode(node*& root, int value) {
+    node* target = root;
+
+    //If the function hasn't found the correct value yet 
+    while (target && target->data != value) {
+      if (value < target->data){
+  target = target->left;
+      }
+      else{
+  target = target->right;
+      }
+    }
+
+    //If node is not fund
+    if (!target){
+      return; 
+
+    }; // Node not found
+
+
+    node* rotatiningNode = target;
+    //Color of the original node matters alot
+    char rotatiningNodeOriginalColor = rotatiningNode->color;
+    node* turningNode = NULL;
+    node* turningNodeParent = NULL;
+
+    // When node has children
+    if (target->left && target->right) {
+        rotatiningNode = lowest(target->right);
+        rotatiningNodeOriginalColor = rotatiningNode->color;
+        target->data = rotatiningNode->data; // Replace value
+        target = rotatiningNode; 
+    }
+
+    turningNode = (target->left) ? target->left : target->right;
+    turningNodeParent = target->parent;
+
+    if (turningNode){
+      turningNode->parent = target->parent;
+    }
+    if (!target->parent){
+      root = turningNode;
+    }
+    else if (target == target->parent->left){
+      target->parent->left = turningNode;
+    }
+    else{
+      target->parent->right = turningNode;
+    }
+   //Omg the stupid start of the cases of the redblack tree
+    if (rotatiningNodeOriginalColor == 'B') {
+      //If color is still black, then more manipulation is required
+        while (turningNode != root && (!turningNode || turningNode->color == 'B')) {
+            if (turningNode == turningNodeParent->left) {
+                node* sib = turningNodeParent->right;
+                if (sib && sib->color == 'R') {
+      //Required rotation because sibling is red and doesn't work
+                    sib->color = 'B';
+                    turningNodeParent->color = 'R';
+                    Left(turningNodeParent, root);
+                    sib = turningNodeParent->right;
+                }
+
+                if ((!sib->left || sib->left->color == 'B') &&
+                    (!sib->right || sib->right->color == 'B')) {
+      if (sib) {
+        sib->color = 'R';
+      }
+                    turningNode = turningNodeParent;
+                    turningNodeParent = turningNode->parent;
+                }
+
+    else {
+                    if (!sib->right || sib->right->color == 'B') {
+                        if (sib->left) sib->left->color = 'B';
+                        sib->color = 'R';
+                        Right(sib, root);
+                        sib = turningNodeParent->right;
+                    }
+                    sib->color = turningNodeParent->color;
+                    turningNodeParent->color = 'B';
+                    if (sib->right) sib->right->color = 'B';
+                    Left(turningNodeParent, root);
+                    break;
+                }
+            } else {
+                node* sib = turningNodeParent->left;
+                if (sib && sib->color == 'R') {
+                    sib->color = 'B';
+                    turningNodeParent->color = 'R';
+                    Right(turningNodeParent, root);
+                    sib = turningNodeParent->left;
+                }
+
+                if ((!sib->left || sib->left->color == 'B') &&
+                    (!sib->right || sib->right->color == 'B')) {
+                    if (sib) sib->color = 'R';
+                    turningNode = turningNodeParent;
+                    turningNodeParent = turningNode->parent;
+                } else {
+                    if (!sib->left || sib->left->color == 'B') {
+                        if (sib->right) sib->right->color = 'B';
+                        sib->color = 'R';
+                        Left(sib, root);
+                        sib = turningNodeParent->left;
+                    }
+                    sib->color = turningNodeParent->color;
+                    turningNodeParent->color = 'B';
+                    if (sib->left) sib->left->color = 'B';
+                    Right(turningNodeParent, root);
+                    break;
+                }
+            }
+        }
+        if (turningNode) {
+    turningNode->color = 'B';
+  }
+    }
+
+    //if not then just delete!! simple if it is red 
+    delete target;
 }
