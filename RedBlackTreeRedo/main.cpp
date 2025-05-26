@@ -1,27 +1,34 @@
-#include <cstring>
-#include <fstream>
 #include <iostream>
+#include <fstream>
+#include <cstring>
+#include <cctype>
+#include <iomanip>
 
 using namespace std;
 
 /*
-  Author: Joanna Mei
-  Date: March 21st 2025
-  This program reads in either a file or input and sorts it in a binary tree
- */
+    Author: Joanna Mei 
+    Date: 5/26/25
+    Description: This program creates a red black tree that allows the user to add numbers to the tree, search for numbers, and print the tree.
+    Citations: https://www.geeksforgeeks.org/introduction-to-red-black-tree/
+    https://www.eecs.umich.edu/courses/eecs380/ALG/red_black.html
+    https://www.geeksforgeeks.org/introduction-to-red-black-tree/v
+    */
 
-// Class to orgaize the data inside the node used for the program
+// Creating the original node that stores all the values for the red black tree
 struct node {
     int data;
     node* left;
     node* right;
     node* parent;
-    char color; // 'R' or 'B'
+    char color; //Setting color to either red or black
 
+
+//Default color on all red black trees start with red
     node(int d) : data(d), left(NULL), right(NULL), parent(NULL), color('R') {}
 };
 
-// ---------------------- Function Prototypes ------------------------
+// Declaring all the functino prototypes 
 void insert(node*& root, node* newNode);
 void fixInsert(node*& root, node* current);
 void rotateLeft(node*& root, node* x);
@@ -29,11 +36,140 @@ void rotateRight(node*& root, node* x);
 void printTree(node* root, int space = 0);
 node* search(node* root, int val);
 
+//Delete function prototypes
 
-int main() {
-  // Initializing variables
 
-  // Used to organize binary tree nodes
+// Inserting function that adds nodes to tree
+void insert(node*& root, node* newNode) {
+    node* current = root;
+    node* parent = NULL;
+
+    while (current != NULL) {
+        parent = current;
+        if (newNode->data < current->data)
+            current = current->left;
+        else
+            current = current->right;
+    }
+
+    //If the parent is null then the node is the root
+    newNode->parent = parent;
+    if (parent == NULL)
+        root = newNode;
+    else if (newNode->data < parent->data)
+        parent->left = newNode;
+    else
+        parent->right = newNode;
+
+    //Fixing the insert
+    fixInsert(root, newNode);
+}
+
+// Adding the fixing logic 
+void fixInsert(node*& root, node* current) {
+    while (current != root && current->parent->color == 'R') {
+        node* parent = current->parent;
+        node* grandparent = parent->parent;
+
+        //Ensures that two reds are never in order next to each other
+        if (parent == grandparent->left) {
+            node* uncle = grandparent->right;
+            if (uncle && uncle->color == 'R') {
+                parent->color = 'B';
+                uncle->color = 'B';
+                grandparent->color = 'R';
+                current = grandparent;
+            } else {
+                if (current == parent->right) {
+                    current = parent;
+                    rotateLeft(root, current);
+                }
+                parent->color = 'B';
+                grandparent->color = 'R';
+                rotateRight(root, grandparent);
+            }
+        } else {
+            // 
+            node* uncle = grandparent->left;
+            if (uncle && uncle->color == 'R') {
+                parent->color = 'B';
+                uncle->color = 'B';
+                grandparent->color = 'R';
+                current = grandparent;
+            } else {
+                if (current == parent->left) {
+                    current = parent;
+                    rotateRight(root, current);
+                }
+                parent->color = 'B';
+                grandparent->color = 'R';
+                rotateLeft(root, grandparent);
+            }
+        }
+    }
+    root->color = 'B';
+}
+
+// Rotating the tree left
+void rotateLeft(node*& root, node* x) {
+    node* y = x->right;
+    x->right = y->left;
+    if (y->left)
+        y->left->parent = x;
+
+    y->parent = x->parent;
+    if (!x->parent)
+        root = y;
+    else if (x == x->parent->left)
+        x->parent->left = y;
+    else
+        x->parent->right = y;
+
+    y->left = x;
+    x->parent = y;
+}
+
+//Rotating right function that fixes the tree
+void rotateRight(node*& root, node* x) {
+    node* y = x->left;
+    x->left = y->right;
+    if (y->right)
+        y->right->parent = x;
+
+    y->parent = x->parent;
+    if (!x->parent)
+        root = y;
+    else if (x == x->parent->right)
+        x->parent->right = y;
+    else
+        x->parent->left = y;
+
+    y->right = x;
+    x->parent = y;
+}
+
+// Allowing yourself to print the stree!
+void printTree(node* root, int space) {
+    if (!root)
+        return;
+    space += 5;
+    printTree(root->right, space);
+    cout << setw(space) << root->data << "(" << root->color << ")" << endl;
+    printTree(root->left, space);
+}
+
+// Search function that checks the roots / data and compares with input 
+node* search(node* root, int val) {
+    while (root != NULL && root->data != val) {
+        if (val < root->data)
+            root = root->left;
+        else
+            root = root->right;
+    }
+    return root;
+}
+
+// -Main function 
 int main() {
     node* root = NULL;
     char input[100];
@@ -100,75 +236,19 @@ int main() {
 
         } else if (strcmp(input, "QUIT") == 0) {
             active = false;
+
+        } else if (strcmp(input, "DELETE") == 0) {
+                int delVal;
+                cout << "Enter number to delete: ";
+                cin >> delVal;
+                deleteNode(root, delVal);
         } else {
             cout << "Invalid command. Try again." << endl;
         }
 
         if (active)
-            cout << "\nEnter a command: ADD, SEARCH, PRINT, QUIT" << endl;
+            cout << "\nEnter a command: ADD, SEARCH, PRINT, QUIT, DELETE" << endl;
     }
 
     return 0;
-}
-// Adding stuff to tree!
-void insert(node *tree, int data) {
-  // Ensuring you are at the root first
-  if (tree->getData() == -1) {
-    tree->setData(data);
-    return;
-  } else {
-    // Functino that checks whether data goes left or right
-    if (data < tree->getData() && tree->getLeft()) {
-      tree = tree->getLeft();
-      add(tree, data);
-    }
-    // Addind node!
-    else if (data < tree->getData() && !tree->getLeft()) {
-      node *newNode = new node(data);
-      tree->setLeft(newNode);
-      return;
-    }
-
-    // If to the right, check if base of tree
-    if (data > tree->getData() && tree->getRight()) {
-      tree = tree->getRight();
-      add(tree, data);
-    }
-    // Adding node
-    else if (data > tree->getData() && !tree->getRight()) {
-      node *newNode = new node(data);
-      tree->setRight(newNode);
-      return;
-    }
-  }
-}
-
-void insert(){
-
-}
-
-void Left() {
-
-}
-
-void Right() {
-
-}
-
-void printTree() {
-
-}
-
-void fix() {
-
-
-}
-
-
-void Delete() {
-
-}
-
-void search() {
-
 }
