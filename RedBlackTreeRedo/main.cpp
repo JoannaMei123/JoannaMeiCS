@@ -191,63 +191,7 @@ node* minimum(node* root) {
     return root;
 }
 
-// Fix violations after deletion
-void fixDelete(node*& root, node* x, node* xParent) {
-    while (x != root && (!x || x->color == 'B')) {
-        if (x == xParent->left) {
-            node* w = xParent->right;
-            if (w && w->color == 'R') {
-                w->color = 'B';
-                xParent->color = 'R';
-                rotateLeft(root, xParent);
-                w = xParent->right;
-            }
-            if ((!w->left || w->left->color == 'B') && (!w->right || w->right->color == 'B')) {
-                if (w) w->color = 'R';
-                x = xParent;
-                xParent = x->parent;
-            } else {
-                if (!w->right || w->right->color == 'B') {
-                    if (w->left) w->left->color = 'B';
-                    if (w) w->color = 'R';
-                    rotateRight(root, w);
-                    w = xParent->right;
-                }
-                if (w) w->color = xParent->color;
-                xParent->color = 'B';
-                if (w && w->right) w->right->color = 'B';
-                rotateLeft(root, xParent);
-                x = root;
-            }
-        } else {
-            node* w = xParent->left;
-            if (w && w->color == 'R') {
-                w->color = 'B';
-                xParent->color = 'R';
-                rotateRight(root, xParent);
-                w = xParent->left;
-            }
-            if ((!w->left || w->left->color == 'B') && (!w->right || w->right->color == 'B')) {
-                if (w) w->color = 'R';
-                x = xParent;
-                xParent = x->parent;
-            } else {
-                if (!w->left || w->left->color == 'B') {
-                    if (w->right) w->right->color = 'B';
-                    if (w) w->color = 'R';
-                    rotateLeft(root, w);
-                    w = xParent->left;
-                }
-                if (w) w->color = xParent->color;
-                xParent->color = 'B';
-                if (w && w->left) w->left->color = 'B';
-                rotateRight(root, xParent);
-                x = root;
-            }
-        }
-    }
-    if (x) x->color = 'B';
-}
+
 
 // Main delete function
 void deleteNode(node*& root, int val) {
