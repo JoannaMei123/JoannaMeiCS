@@ -37,7 +37,10 @@ void printTree(node* root, int space = 0);
 node* search(node* root, int val);
 
 //Delete function prototypes
-
+void deleteNode(node*& root, int val);
+void fixDelete(node*& root, node* x, node* xParent);
+void transplant(node*& root, node* u, node* v);
+node* minimum(node* root);
 
 // Inserting function that adds nodes to tree
 void insert(node*& root, node* newNode) {
@@ -169,13 +172,137 @@ node* search(node* root, int val) {
     return root;
 }
 
+// Helper function to replace one subtree with another
+void transplant(node*& root, node* u, node* v) {
+    if (!u->parent)
+        root = v;
+    else if (u == u->parent->left)
+        u->parent->left = v;
+    else
+        u->parent->right = v;
+    if (v)
+        v->parent = u->parent;
+}
+
+// Helper function to find the minimum node in a subtree
+node* minimum(node* root) {
+    while (root->left)
+        root = root->left;
+    return root;
+}
+
+// Fix violations after deletion
+void fixDelete(node*& root, node* x, node* xParent) {
+    while (x != root && (!x || x->color == 'B')) {
+        if (x == xParent->left) {
+            node* w = xParent->right;
+            if (w && w->color == 'R') {
+                w->color = 'B';
+                xParent->color = 'R';
+                rotateLeft(root, xParent);
+                w = xParent->right;
+            }
+            if ((!w->left || w->left->color == 'B') && (!w->right || w->right->color == 'B')) {
+                if (w) w->color = 'R';
+                x = xParent;
+                xParent = x->parent;
+            } else {
+                if (!w->right || w->right->color == 'B') {
+                    if (w->left) w->left->color = 'B';
+                    if (w) w->color = 'R';
+                    rotateRight(root, w);
+                    w = xParent->right;
+                }
+                if (w) w->color = xParent->color;
+                xParent->color = 'B';
+                if (w && w->right) w->right->color = 'B';
+                rotateLeft(root, xParent);
+                x = root;
+            }
+        } else {
+            node* w = xParent->left;
+            if (w && w->color == 'R') {
+                w->color = 'B';
+                xParent->color = 'R';
+                rotateRight(root, xParent);
+                w = xParent->left;
+            }
+            if ((!w->left || w->left->color == 'B') && (!w->right || w->right->color == 'B')) {
+                if (w) w->color = 'R';
+                x = xParent;
+                xParent = x->parent;
+            } else {
+                if (!w->left || w->left->color == 'B') {
+                    if (w->right) w->right->color = 'B';
+                    if (w) w->color = 'R';
+                    rotateLeft(root, w);
+                    w = xParent->left;
+                }
+                if (w) w->color = xParent->color;
+                xParent->color = 'B';
+                if (w && w->left) w->left->color = 'B';
+                rotateRight(root, xParent);
+                x = root;
+            }
+        }
+    }
+    if (x) x->color = 'B';
+}
+
+// Main delete function
+void deleteNode(node*& root, int val) {
+    node* z = search(root, val);
+    if (!z) {
+        cout << "Value not found in tree.\n";
+        return;
+    }
+
+    node* y = z;
+    char yOriginalColor = y->color;
+    node* x = nullptr;
+    node* xParent = nullptr;
+
+    if (!z->left) {
+        x = z->right;
+        xParent = z->parent;
+        transplant(root, z, z->right);
+    } else if (!z->right) {
+        x = z->left;
+        xParent = z->parent;
+        transplant(root, z, z->left);
+    } else {
+        y = minimum(z->right);
+        yOriginalColor = y->color;
+        x = y->right;
+        if (y->parent == z) {
+            if (x) x->parent = y;
+            xParent = y;
+        } else {
+            transplant(root, y, y->right);
+            y->right = z->right;
+            if (y->right) y->right->parent = y;
+            xParent = y->parent;
+        }
+        transplant(root, z, y);
+        y->left = z->left;
+        if (y->left) y->left->parent = y;
+        y->color = z->color;
+    }
+
+    delete z;
+
+    if (yOriginalColor == 'B')
+        fixDelete(root, x, xParent);
+}
+
+
 // -Main function 
 int main() {
     node* root = NULL;
     char input[100];
     bool active = true;
 
-    cout << "Enter a command: ADD, SEARCH, PRINT, QUIT" << endl;
+    cout << "Enter a command: ADD, SEARCH, PRINT, QUIT, DELETE" << endl;
 
     while (active) {
         cin >> input;
