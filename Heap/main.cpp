@@ -41,7 +41,7 @@ int main () {
   while (true){
     int index=0;
     char input[200];
-    cout<<"Type F for File, and M for manual numbers" <<endl;
+    cout<<"Type F for File, and M for manual numbers, or select command PRINT, DELETE" <<endl;
     cin>>input;
 
 
@@ -110,6 +110,9 @@ int main () {
     }
     else if (strcmp(input, "QUIT")==0){
       exit(0);
+    }
+    else if (strcmp(input, "PRINT")==0){
+      print(heap,0,0,size);
     }
 
   }
