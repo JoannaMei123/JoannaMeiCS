@@ -117,7 +117,10 @@ void addCmd(structureInfo **&hashtable, int & size) {
 
 //Checks Collision detection
 structureInfo** addStudent(structureInfo **&hashtable, int & size, structureInfo *newStudent) {
-  structureInfo* currentStudent = hashtable[newStudent->hashTableValue];
+  newStudent->hashTableValue = newStudent->studentId % size;
+  int index = newStudent->hashTableValue;
+  structureInfo* currentStudent = hashtable[index];
+
   int hashCollision = 0;
 
   //If there is no current student
