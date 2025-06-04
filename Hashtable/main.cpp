@@ -1,15 +1,13 @@
 #include <iostream>
-#include <ctime>
 #include <cstring>
-#include <bits/stdc++.h>
 #include <vector>
 #include <iterator>
 #include <iomanip>
 #include <fstream>
+#include <string>
+using namespace std;
 
-/*
-
-  Hash table
+/* Hash table
   2/2/25
   Joanna Mei
 
@@ -17,256 +15,120 @@
  students or quit trying. Below are the instructions for each command, and what they do. 
 
  + Implementation of Hash table to structure students versus vector list
+*/
 
-
-
-
- */
-
-
-using namespace std;
-
-//Creating the struct that stores all the information of the student
-struct structureInfo {
-  char firstName[100];
-  char lastName[100];
-  int studentId;
-  int hashTableValue;
-  float GPA;
-  structureInfo * next = NULL;
+//struct of Students with firstname, lastname, id, and gpa
+struct Students
+{
+  char first_name[22];
+  char last_name[22];
+  int id;
+  //this is the key 
+  int hash;
+  float gpa;
+  Students* next = NULL;
 };
 
+//function prototypes 
+void AddName(Students** &hashtable, int &size);
+void GenerateName(Students** &hashtable, int &size);
+Students** add(Students* student, Students** &hashtable, int &size);
+void printName(Students** &hashtable, int &size);
+Students** deleteName(Students** &hashtable, int &size);
 
 
-void addCmd(structureInfo **&hashtable, int & size);
-void printCmd(structureInfo **&hashtable, int & size);
-structureInfo ** addStudent(structureInfo **&hashtable, int & size, structureInfo * newStudent);
-structureInfo ** deleteCmd(structureInfo **&hashtable, int & size);
-void generateCmd(structureInfo **&hashtable, int &size);
+int main()
+{
 
+  //this is the vector that will be passed everywhere
+  int size=100;
+  //this is the hash table 
+  Students** hashtable = new Students*[size];
 
-int main() {
-  //Initiating vector
-  int size = 100;
   srand(time(NULL));
-  structureInfo **hashtable = new structureInfo*[size];
+  while (true)
+  {
+    char input[21];
 
 
-
-  while (true) {
-
-  cout << "Please type a command in the prompt below. Type ADD to create a new entry, PRINT to print th\
-e student information, GENERATE to generate a random student, and DELETE to remove the student. If you want to quit the program, enter QUIT" <\
-< endl;
-  char playerInput[100];
-
-  cin >> playerInput;
-
-  //The "ADD" function (When the player types ADD)
-  if (strcmp(playerInput, "ADD") == 0) {
-    addCmd(hashtable, size);
-  }
-
-  //Function for the "GENERATE" Command
-  if (strcmp(playerInput, "GENERATE") == 0) {
-    generateCmd(hashtable, size);
-  }
-
-
-  //Function for "PRINT" Command
-  if (strcmp (playerInput,"PRINT") ==0) {  
-      printCmd(hashtable, size);
-
-   }
-
-  //Functionn for "DELETE"
-  if (strcmp(playerInput, "DELETE") ==0) {
-    deleteCmd(hashtable, size);
-  } // cmdDelete if state ment
-
-  //Function for the "QUIT" Cmd
-  if (strcmp(playerInput, "QUIT") == 0) {
-    //print(vecList)
-    exit(0);
-  }
-
-  }  //While Loop Brackjet
-
- }//  Main Function Bracket
-
-void addCmd(structureInfo **&hashtable, int & size) {
-
-
-  structureInfo* students = new structureInfo();
-
-    cout << "What is the students first name" <<endl;
-    cin >> students->firstName;
-
-    cout << "What is the Students last name" <<endl;
-    cin >> students ->lastName;
-  cout << "What is the students id?" <<endl;
-    cin >> students -> studentId;
-
-    cout << "What is their gpa?" <<endl;
-    cin >> students -> GPA;
-
-
-    //Adding students to our hash table
-    hashtable = addStudent(hashtable, size, students);
-}
-
-//Checks Collision detection
-structureInfo** addStudent(structureInfo **&hashtable, int & size, structureInfo *newStudent) {
-  newStudent->hashTableValue = newStudent->studentId % size;
-  int index = newStudent->hashTableValue;
-  structureInfo* currentStudent = hashtable[index];
-
-  int hashCollision = 0;
-
-  //If there is no current student
-  if (currentStudent == NULL) {
-    //If the student is NOT inside the hash table slot, add the student
-    hashtable[newStudent->hashTableValue] = newStudent;
-  } else {
-
-    //If the students next slot is not empty, then we need to check for collision
-    while (currentStudent->next != NULL) {
-      currentStudent = currentStudent->next;
-
-      //Add to collision to increase increment
-      hashCollision++;
+    cout<<"Would you like to ADD, GENERATE, PRINT, or DELETE a student or would you like to QUIT this program?"<<endl;
+    cin>>input;
+    //The "ADD" function (When the player types ADD)
+    if (strcmp(input,"ADD")==0)
+    {
+      AddName(hashtable,size);
+    }//The "GENERATE" function (When the player types GENERATE)
+    else if (strcmp(input, "GENERATE")==0){
+      GenerateName(hashtable,size);
     }
-     currentStudent -> next = newStudent;
-  }
-
-
-  //If the collision is equal to 3, then we need to increase the size of the hash table
-  if (hashCollision == 3) {
-    cout << "Hash table is full" <<endl;
-
-    //Increasing hash table size by multiple of 2
-    structureInfo **newHashtable = new structureInfo*[size * 2];
-    for (int i = 0; i < size; i++) {
-      structureInfo* currenttemp = hashtable[i];
-      while (currenttemp != NULL) {
-        int newHashValue = newStudent->studentId % (size * 2);
-        structureInfo* copiedStudents = new structureInfo();
-        copiedStudents -> next = NULL;
-
-        //Copying values into temp variables
-        strcpy(copiedStudents->firstName, currenttemp->firstName);
-         strcpy(copiedStudents->lastName, currenttemp->lastName);
-        copiedStudents->studentId = currenttemp->studentId;
-        copiedStudents->GPA = currenttemp->GPA;
-        copiedStudents -> hashTableValue = newHashValue;
-
-        //If the new hash table is empty, then add the student
-        if (newHashtable[newHashValue] == NULL) {
-          newHashtable[newHashValue] = copiedStudents;
-        } else{
-          //If the new hash table is not empty, then we need to check for collision
-          structureInfo* temp = newHashtable[newHashValue];
-          while (temp->next != NULL) {
-            temp = temp->next;
-          }
-
-          temp->next = copiedStudents;
-        }
-        currenttemp = currenttemp->next;
-
-
-      }
+    //The "PRINT" function (When the player types PRINT)
+    else if (strcmp(input,"PRINT")==0)
+    {
+      printName(hashtable,size);
     }
-    //Deleting the old hash table
-    hashtable = newHashtable;
-    size*=2;
-    hashCollision = 0;
+
+    //The "DELETE" function (When the player types DELETE)
+    else if(strcmp(input,"DELETE")==0)
+    {
+      deleteName(hashtable,size);
+    }
+    //the "QUIT" function (When the player types QUIT)
+
+    else if (strcmp(input,"QUIT")==0)
+    {
+      exit(0);
+    }
   }
-  return hashtable;
+
 }
 
 
-//Printing out
-void printCmd(structureInfo **&hashtable, int & size) {
-    for (int i = 0; i < size; i++) {
+//manually adding a new student
+//same as student list 
+void AddName(Students** &hashtable, int &size)
+{
 
-      //If the hashtables index is NOT empty
-      if (hashtable[i] != NULL) {
-        //Print out all the hash table values stored for that index
-        cout << hashtable[i]->firstName << " " << hashtable[i]->lastName << " " <<hashtable[i]->studentId << " " << hashtable[i]->GPA <<endl;
+  char first_name[22];
+  char last_name[22];
+  int id;
+  float gpa;
+  Students* student=new Students();
+  cout<<"Please enter the student's first name: ";
+  cin>>student->first_name;
+  cout<<"Please enter the student's last name: ";
+  cin>>student->last_name;
+  cout<<"Please enter the student's ID number: ";
+  cin>>student->id;
+  cout<<"Please enter the student's GPA: ";
+  cin>>student->gpa;
+ //Putting all values into a vector
+  hashtable = add(student, hashtable, size);
 
-        //Creating a temp variable to store the next value
-        structureInfo *currentStudent = hashtable[i];
-        while (currentStudent ->next!=NULL) {
-          currentStudent = currentStudent ->next;
-      //Printing out the next values in the hash
-          cout << currentStudent->firstName << "," << currentStudent->lastName << "," <<currentStudent->studentId << ", " << currentStudent->GPA <<endl;
-        }
-      }
-      else {
-        ;
-      }
-    }
 }
 
-//Delete command
-structureInfo** deleteCmd(structureInfo **&hashtable, int & size) {
-    int removeStudentID;
-    cout << "Which student do you want to remove?" <<endl;
-    cin >> removeStudentID;
-
-
-  //Creating IF loop to interate through the has table
-  for (int i = 0; i < size; i++) {
-    if (hashtable[i]!=NULL) {
-      //If the structures current student is in the same place as the hashtables current index
-      structureInfo* currentStudent = hashtable[i];
-      structureInfo* prevStudent = NULL;
-      while (currentStudent != NULL) {
-
-        //If the ID is the same as one typed
-        if (currentStudent->studentId == removeStudentID) {
-          //Add previous student is not there
-          if (prevStudent == NULL) {
-
-            //setting current hash table index to the current students "next" slot
-            hashtable[i] = currentStudent->next;
-          } else {
-            prevStudent->next = currentStudent->next;
-          }
-          return hashtable;
-        }
-        prevStudent = currentStudent;
-        currentStudent = currentStudent -> next;
-      }
-    }
-    else {
-      ;
-    }
-  }
-  return hashtable;
-}
-
-//Functio to generate NAMES
-void generateCmd(structureInfo** &hashtable, int &size){
+//adds a student using randomly generated data from input files 
+void GenerateName(Students** &hashtable, int &size){
   cout<<"How many students would you like to add?"<<endl;
   int students;
   cin>>students;
+  //run a for loop for the amount of students that need to be added 
   for (int i=0; i<students; i++){
 
+
     ifstream f("FirstName.txt");
-    //Pick random name out of the 1000 names within the file (File taken from Fiona Wang's first name file)
-    int num=rand()% 1000;
+    //Out of 427 because that is the amount of lines in the file
+    int num=rand()% 427;
     char firstname[100];
-    for (int i = 1; i <= num; i++){ 
-      //Making the first name
+    for (int i = 1; i <= num; i++){
+      //get the line that corresponds to that num
+      //copy that line into the firstname char array of size firstname 
       f.getline(firstname,sizeof(firstname));
     }
     f.close();
 
-    //last name file was taken from Fiona Wang's Hash Table Last Name file
+    //same logic for last name 
     ifstream l("LastName.txt");
-    int num2=rand()% 1000;
+    int num2=rand()% 441;
     char lastname[100];
     for (int i = 1; i <= num2; i++){
       l.getline(lastname,sizeof(lastname));
@@ -274,22 +136,160 @@ void generateCmd(structureInfo** &hashtable, int &size){
     l.close();
 
 
-
-   //Adding new student
-    structureInfo* student= new structureInfo();
-   //Assigning variables
-    strcpy(student->firstName,firstname);
-    cout<<student->firstName;
-    strcpy(student->lastName,lastname);
-    cout<<student->lastName;
-
-    //Creating a fake ID
-    int id= rand()% 981023;
-    student->studentId=id;
-
+//Creating student
+    Students* student= new Students();
+    strcpy(student->first_name,firstname);
+    cout<<student->first_name;
+    strcpy(student->last_name,lastname);
+    cout<<student->last_name;
+    // set the id to a random number
+    int id= rand()% 100001;
+    student->id=id;
+    //set the float to a random double with 2 decimal places
     float gpa = (double)(rand()%50)/10;
-    student->GPA = gpa;
-    //Adding to table and rehasing if collisions
-    hashtable = addStudent(hashtable, size, student);
+    student->gpa = gpa;
+    //add to the table and check for collisions and rehash if needed
+    hashtable = add(student, hashtable, size);
+  }
+}
+
+//function to check for collisions and handles any reshasing that may be necessary 
+Students** add(Students* student, Students** &hashtable, int &size) {
+  //current spot is the students hash 
+  Students* current = hashtable[student->hash];
+  int collisions = 0;
+
+  // if there is nothing in the current space
+  if(current == NULL){    
+    //add the student to that hash spot 
+    hashtable[student->hash] = student;
+  }
+  //if something is already there
+
+  else{
+
+    //while the spot is not empty (meaning there is a collision)
+    while(current->next!=NULL){
+      //keep going to the next spot
+      current = current->next;
+      //update collisions 
+      collisions++;
+      //cout<<"A collision happened"<<endl;
+    }
+
+    current->next = student;
+  }
+
+  if (collisions==3){
+   //Rehasing table
+    Students** newTable = new Students*[size*2]();
+    for (int i=0;i<size;i++){
+      Students* currenttemp= hashtable[i];
+      while (currenttemp!=NULL){
+
+  int newHash= student->id % (size*2);
+
+        Students* studentToBeCopiedOver= new Students();
+        studentToBeCopiedOver->next = NULL;
+        strcpy(studentToBeCopiedOver->first_name,currenttemp->first_name);
+        strcpy(studentToBeCopiedOver->last_name,currenttemp->last_name);
+        studentToBeCopiedOver->id = currenttemp->id;
+        studentToBeCopiedOver->gpa = currenttemp->gpa;
+        studentToBeCopiedOver->hash=newHash;
+
+  //if slot in the new table with the new hash is empty 
+  if (newTable[newHash] == NULL) {
+    //add student into that slot 
+          newTable[newHash] = studentToBeCopiedOver;
+  }
+  //if the slot is not empty - that is a problem because that means it is a collision 
+  else{
+    //set a temp student to that place that is already filled up in the table
+     Students* temp = newTable[newHash];
+     //while we havent found a spot to put this student keep going here 
+     while(temp->next != NULL){
+       // keep moving to the next spot 
+       temp=temp->next;
+     }
+     //we found a place! YAY! put the student here 
+     temp->next=studentToBeCopiedOver;
+  }
+  //move to the next one 
+  currenttemp=currenttemp->next;
+      }
+    }
+    //delete [] hashtable;  
+    hashtable=newTable;
+    size*=2;
+    collisions=0;
+  }
+  return hashtable;
+}
+
+
+
+
+Students** deleteName(Students** &hashtable, int &size)
+{
+  cout<<"Please enter the ID of the student you want to delete"<<endl;
+  int input;
+  cin>>input;
+  for (int i=0; i<size; i++){
+    if(hashtable[i]!=NULL){
+      //cout<<i<<"here"<<endl;
+      //first student from which the linked list is created
+      //set the currrent student to the first hashtable spot
+      Students* current= hashtable[i];
+      Students* prev=NULL;
+      //if current is not NULL which means the spot is filled 
+      while (current!=NULL){
+  //if the id is the same as the inputted id
+  if(current->id==input){
+    //hashtable[i]=NULL;
+    //if the previous one has no space 
+    if (prev==NULL){
+      hashtable[i]=current->next;
+    }
+    else{
+      prev->next=current->next;
+    }
+    return hashtable; 
+    //main();
+  }
+  //move to the next one
+  prev=current;
+  current=current->next;
+      }
+    }
+    else{
+      ;
+    }
+  }
+  //return the new hashtable
+  return hashtable;
+}
+
+
+void printName(Students** &hashtable, int &size)
+{
+  //go through all the table slots
+  for (int i=0; i<size; i++){
+    //if there is something in that slot (aka the first person)
+    if(hashtable[i]!=NULL){
+      //cout<<i<<"here"<<endl;
+      //print that person's information
+      //this only works for the first person because the rest is a linked list of that first person
+      cout<<hashtable[i]->first_name<<" "<<hashtable[i]->last_name<<","<<hashtable[i]->id<<","<<hashtable[i]->gpa<<endl;
+      //cout<<hashtable[i]->last_name<<endl;
+      Students* current= hashtable[i];
+      while (current->next!=NULL){
+        current=current->next;
+  //now keep moving through the linked list and print out all the information
+  cout<<current->first_name<<" "<<current->last_name<<","<<current->id<<","<<current->gpa<<endl;
+      }
+    }
+    else{
+      ;
+    }
   }
 }
